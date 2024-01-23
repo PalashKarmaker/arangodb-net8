@@ -26,4 +26,8 @@
     <Folder Include="Docs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\velocypacknet\src\ArangoDB.VelocyPack\ArangoDB.VelocyPack.csproj" />
+  </ItemGroup>
+
 </Project>

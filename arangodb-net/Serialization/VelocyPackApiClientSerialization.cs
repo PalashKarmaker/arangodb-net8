@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ArangoDB.VelocyPack;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.IO;
 using System.Text;
@@ -6,10 +7,7 @@ using System.Threading.Tasks;
 
 namespace ArangoDBNet.Serialization;
 
-/// <summary>
-/// Implements a <see cref="IApiClientSerialization"/> that uses Json.NET.
-/// </summary>
-public class JsonNetApiClientSerialization : ApiClientSerialization
+public class VelocyPackApiClientSerialization : ApiClientSerialization
 {
     /// <summary>
     /// Deserializes the JSON structure contained by the specified stream
@@ -22,13 +20,10 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
     {
         if (stream == null || !stream.CanRead)
             return default;
-
         using var sr = new StreamReader(stream);
-        using var jtr = new JsonTextReader(sr);
-        var js = new JsonSerializer();
-
-        T result = js.Deserialize<T>(jtr);
-
+        using var ms = new MemoryStream();
+        stream.CopyTo(ms);
+        var result = VPack.Deserialize<T>(ms.ToArray());
         return result;
     }
 
@@ -41,8 +36,13 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
     /// <returns></returns>
     public override async Task<T> DeserializeFromStreamAsync<T>(Stream stream)
     {
-        T result = DeserializeFromStream<T>(stream);
-        return await Task.FromResult(result);
+        if (stream == null || !stream.CanRead)
+            return default;
+        using var sr = new StreamReader(stream);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms).ConfigureAwait(false);
+        var result = VPack.Deserialize<T>(ms.ToArray());
+        return result;
     }
 
     /// <summary>
@@ -54,11 +54,8 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
     /// the serialization options should be provided by the serializer, otherwise the given options should be used.</param>
     /// <returns></returns>
 
-    public override byte[] Serialize<T>(T item, ApiClientSerializationOptions serializationOptions)
-    {
-        string json = SerializeToString(item, serializationOptions);
-        return Encoding.UTF8.GetBytes(json);
-    }
+    public override byte[] Serialize<T>(T item, ApiClientSerializationOptions serializationOptions) => 
+        VPack.Serialize(item);
 
     /// <summary>
     /// Asynchronously serializes the specified object to a sequence of bytes,
@@ -71,8 +68,8 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
     /// <returns></returns>
     public override async Task<byte[]> SerializeAsync<T>(T item, ApiClientSerializationOptions serializationOptions)
     {
-        var result = Serialize<T>(item, serializationOptions);
-        return await Task.FromResult(result);
+        var result = Task.Run(() => Serialize(item, serializationOptions));
+        return await result.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -87,10 +84,7 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
     public override string SerializeToString<T>(T item, ApiClientSerializationOptions serializationOptions)
     {
         // When no options passed use the default.
-        if (serializationOptions == null)
-        {
-            serializationOptions = DefaultOptions;
-        }
+        serializationOptions ??= DefaultOptions;
 
         var jsonSettings = new JsonSerializerSettings
         {
@@ -105,9 +99,7 @@ public class JsonNetApiClientSerialization : ApiClientSerialization
         }
 
         if (serializationOptions.UseCamelCasePropertyNames)
-        {
             jsonSettings.ContractResolver = new CamelCasePropertyNamesExceptDictionaryContractResolver(serializationOptions);
-        }
 
         string json = JsonConvert.SerializeObject(item, jsonSettings);
 

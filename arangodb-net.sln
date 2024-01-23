@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArangoDBNet", "arangodb-net
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArangoDBNetTest", "arangodb-net.Test\ArangoDBNetTest.csproj", "{70184444-F45A-4357-84BE-1AA5F6E8344E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArangoDB.VelocyPack", "..\velocypacknet\src\ArangoDB.VelocyPack\ArangoDB.VelocyPack.csproj", "{C7BA088C-EBEF-472B-9FEE-B63F5369D8BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{70184444-F45A-4357-84BE-1AA5F6E8344E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70184444-F45A-4357-84BE-1AA5F6E8344E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70184444-F45A-4357-84BE-1AA5F6E8344E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7BA088C-EBEF-472B-9FEE-B63F5369D8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7BA088C-EBEF-472B-9FEE-B63F5369D8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7BA088C-EBEF-472B-9FEE-B63F5369D8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7BA088C-EBEF-472B-9FEE-B63F5369D8BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
