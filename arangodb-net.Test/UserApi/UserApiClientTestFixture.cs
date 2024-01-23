@@ -1,0 +1,77 @@
+﻿using ArangoDBNet;
+using ArangoDBNet.CollectionApi.Models;
+using ArangoDBNet.DatabaseApi.Models;
+using System.Threading.Tasks;
+
+namespace ArangoDBNetTest.UserApi
+{
+    /// <summary>
+    /// Provides per-test-class fixture data for <see cref="UserApiClientTest"/>.
+    /// </summary>
+    public class UserApiClientTestFixture : ApiClientTestFixtureBase
+    {
+        public ArangoDBClient ArangoClient { get; private set; }
+
+        public string TestDbName { get; private set; }
+
+        public string UsernameToDelete { get; private set; }
+
+        public string UsernameToCreate { get; private set; }
+
+        public string UsernameExisting { get; private set; }
+
+        public string UsernameToRemoveAccess { get; private set; }
+
+        public string CollectionNameToSetAccess { get; private set; }
+
+        public string CollectionNameToRemoveAccess { get; private set; }
+
+        public UserApiClientTestFixture()
+        {
+            ArangoClient = GetArangoDBClient("_system");
+            TestDbName = nameof(UserApiClientTestFixture);
+            UsernameToDelete = nameof(UserApiClientTestFixture) + "Delete";
+            UsernameToCreate = nameof(UserApiClientTestFixture) + "Post";
+            UsernameExisting = nameof(UserApiClientTestFixture) + "Existing";
+            UsernameToRemoveAccess = nameof(UserApiClientTestFixture) + "DeleteAccess";
+            CollectionNameToSetAccess = "CollectionToSetAccess";
+            CollectionNameToRemoveAccess = "CollectionToRemoveAccess";
+        }
+
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            await CreateDatabase(TestDbName, new DatabaseUser[]
+            {
+                new DatabaseUser()
+                {
+                    Username = UsernameToDelete
+                },
+                new DatabaseUser()
+                {
+                    Username = UsernameExisting
+                },
+                new DatabaseUser()
+                {
+                    Username = UsernameToRemoveAccess
+                }
+            });
+
+            var dbClient = GetArangoDBClient(TestDbName);
+            await GetVersionAsync(dbClient);
+
+            await dbClient.Collection.PostCollectionAsync(new PostCollectionBody()
+            {
+                Name = CollectionNameToSetAccess
+            });
+
+            await dbClient.Collection.PostCollectionAsync(new PostCollectionBody()
+            {
+                Name = CollectionNameToRemoveAccess
+            });
+
+            _users.Add(UsernameToCreate);
+        }
+    }
+}
