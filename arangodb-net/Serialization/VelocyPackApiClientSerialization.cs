@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ArangoDBNet.Serialization;

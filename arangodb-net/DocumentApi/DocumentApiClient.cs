@@ -114,22 +114,18 @@ namespace ArangoDBNet.DocumentApi
         {
             string uriString = _docApiPath + "/" + WebUtility.UrlEncode(collectionName);
             if (query != null)
-            {
                 uriString += "?" + query.ToQueryString();
-            }
 
             var content = await GetContentAsync(document, serializationOptions).ConfigureAwait(false);
             var headerCollection = GetHeaderCollection(headers);
-            using (var response = await _client.PostAsync(uriString, content, headerCollection, token: token).ConfigureAwait(false))
+            using var response = await _client.PostAsync(uriString, content, headerCollection, token: token).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
             {
-                if (response.IsSuccessStatusCode)
-                {
-                    var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    return await DeserializeJsonFromStreamAsync<PostDocumentResponse<U>>(stream).ConfigureAwait(false);
-                }
-
-                throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
+                var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                return await DeserializeJsonFromStreamAsync<PostDocumentResponse<U>>(stream).ConfigureAwait(false);
             }
+
+            throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -62,19 +62,13 @@ namespace ArangoDBNet.CollectionApi
         {
             string uriString = _collectionApiPath;
             if (options != null)
-            {
                 uriString += "?" + options.ToQueryString();
-            }
             var content = await GetContentAsync(body, new ApiClientSerializationOptions(true, true)).ConfigureAwait(false);
-            using (var response = await _transport.PostAsync(uriString, content, null, token).ConfigureAwait(false))
-            {
-                var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                if (response.IsSuccessStatusCode)
-                {
-                    return await DeserializeJsonFromStreamAsync<PostCollectionResponse>(stream).ConfigureAwait(false);
-                }
-                throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
-            }
+            using var response = await _transport.PostAsync(uriString, content, null, token).ConfigureAwait(false);
+            var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+                return await DeserializeJsonFromStreamAsync<PostCollectionResponse>(stream).ConfigureAwait(false);
+            throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -112,19 +106,17 @@ namespace ArangoDBNet.CollectionApi
                       CollectionHeaderProperties headers = null,
                       CancellationToken token = default)
         {
-            using (var response = await _transport.PutAsync(
+            using var response = await _transport.PutAsync(
                 _collectionApiPath + "/" + WebUtility.UrlEncode(collectionName) + "/truncate",
-                new byte[0],
+                Array.Empty<byte>(),
                 headers?.ToWebHeaderCollection(),
-                token).ConfigureAwait(false))
+                token).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
             {
-                if (response.IsSuccessStatusCode)
-                {
-                    var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    return await DeserializeJsonFromStreamAsync<TruncateCollectionResponse>(stream).ConfigureAwait(false);
-                }
-                throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
+                var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                return await DeserializeJsonFromStreamAsync<TruncateCollectionResponse>(stream).ConfigureAwait(false);
             }
+            throw await GetApiErrorExceptionAsync(response).ConfigureAwait(false);
         }
 
         /// <summary>

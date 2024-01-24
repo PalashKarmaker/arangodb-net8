@@ -21,7 +21,7 @@ namespace ArangoDBNetTest.Transport.Http
         public HttpApiTransportTest(HttpApiTransportTestFixture fixture)
         {
             _fixture = fixture;
-            _hostUri = new Uri($"http://{fixture.ArangoDbHost}:{fixture.ArangoDbPort}/");
+            _hostUri = new Uri($"http://{ApiClientTestFixtureBase.ArangoDbHost}:{ApiClientTestFixtureBase.ArangoDbPort}/");
         }
 
         [Fact]

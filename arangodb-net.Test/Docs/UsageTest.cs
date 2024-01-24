@@ -17,7 +17,7 @@ namespace ArangoDBNetTest.Docs
 
         public UsageTest(UsageTestFixture fixture)
         {
-            _arangoDbHost = fixture.ArangoDbHost;
+            _arangoDbHost = ApiClientTestFixtureBase.ArangoDbHost;
         }
 
         class MyClass
