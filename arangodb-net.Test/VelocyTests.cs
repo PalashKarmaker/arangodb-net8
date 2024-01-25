@@ -14,9 +14,11 @@ public class VelocyTests
     public async Task GetVelocyCollectionCountAsync_ShouldSucceed()
     {
         // You must use the _system database to create databases
-        var serialization = new VelocyPackApiClientSerialization();
-        using var transport = VelocyStreamApiTransport.UsingBasicAuthWithDbName(
-            new Uri("http://localhost:8529/"), "Rules", "root", "palash", null);
+        var serialization = new VelocyPackApiClientSerialization();//VelocyStreamApiTransport
+        //using var transport = VelocyStreamApiTransport.UsingBasicAuthWithDbName(
+        //    new Uri("http://localhost:8529/"), "Rules", "root", "palash", null);
+        using var transport = HttpApiTransport.UsingBasicAuth(
+            new Uri("http://localhost:8529/"), "Rules", "root", "palash", HttpContentType.Json);
         using var adb = new ArangoDBClient(transport, serialization);
 
         //try

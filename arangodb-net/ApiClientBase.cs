@@ -6,19 +6,13 @@ using System.Threading.Tasks;
 
 namespace ArangoDBNet
 {
-    public abstract class ApiClientBase
+    /// <summary>
+    /// Creates an instance of <see cref="ApiClientBase"/> using
+    /// the provided serialization layer.
+    /// </summary>
+    /// <param name="serialization"></param>
+    public abstract class ApiClientBase(IApiClientSerialization serialization)
     {
-        private readonly IApiClientSerialization _serialization;
-
-        /// <summary>
-        /// Creates an instance of <see cref="ApiClientBase"/> using
-        /// the provided serialization layer.
-        /// </summary>
-        /// <param name="serialization"></param>
-        public ApiClientBase(IApiClientSerialization serialization)
-        {
-            _serialization = serialization;
-        }
 
         /// <summary>
         /// Gets an <see cref="ApiErrorException"/> from the provided error response.
@@ -30,7 +24,7 @@ namespace ArangoDBNet
             var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             try
             {
-                var error = await _serialization.DeserializeFromStreamAsync<ApiErrorResponse>(stream).ConfigureAwait(false);
+                var error = await serialization.DeserializeFromStreamAsync<ApiErrorResponse>(stream).ConfigureAwait(false);
                 return new ApiErrorException(error);
             }
             catch (Exception e)
@@ -58,7 +52,7 @@ namespace ArangoDBNet
         {
             try
             {
-                return await _serialization.DeserializeFromStreamAsync<T>(stream).ConfigureAwait(false);
+                return await serialization.DeserializeFromStreamAsync<T>(stream).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -70,7 +64,7 @@ namespace ArangoDBNet
         {
             try
             {
-                return await _serialization.SerializeAsync(item, serializationOptions).ConfigureAwait(false);
+                return await serialization.SerializeAsync(item, serializationOptions).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -82,7 +76,7 @@ namespace ArangoDBNet
         {
             try
             {
-                return await _serialization.SerializeToStringAsync(item, serializationOptions).ConfigureAwait(false);
+                return await serialization.SerializeToStringAsync(item, serializationOptions).ConfigureAwait(false);
             }
             catch (Exception e)
             {
